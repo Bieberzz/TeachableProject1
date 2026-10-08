@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animals.Li — Aprenda LIBRAS Jogando</title>
+    <!-- Fonte moderna pré-configurada -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="game-card" id="game-card">
+    <!-- Logomarca estilizada do projeto -->
+    <div class="logo-container">
+        <span class="logo-main">Animals</span><span class="logo-dot">.</span><span class="logo-sub">Li</span><span class="logo-emoji">🤟</span>
+    </div>
+   
+    <div class="fase-badge">Fase <span id="fase-atual">1</span> de <span id="total-fases">5</span></div>
+   
+    <h2 id="instrucao">Pronto para testar seus conhecimentos em LIBRAS?</h2>
+   
+    <!-- Painel do Jogo (escondido até o carregamento) -->
+    <div class="game-grid" id="game-grid" style="display: none;">
+        <!-- Lado Esquerdo: Tutorial Visual -->
+        <div class="display-box">
+            <h3>Como fazer o sinal</h3>
+            <div class="image-wrapper">
+                <img id="imagem-tutorial" class="tutorial-img" src="" alt="Tutorial do sinal em LIBRAS">
+            </div>
+        </div>
+       
+        <!-- Lado Direito: Câmera com IA -->
+        <div class="display-box">
+            <h3>Sua Câmera</h3>
+            <div id="webcam-container"></div>
+        </div>
+    </div>
+
+    <div class="action-area">
+        <button class="btn" id="btn-start" onclick="init()">Começar Desafio</button>
+    </div>
+   
+    <div id="status" style="display: none;">Carregando modelo...</div>
+</div>
+
+<!-- Scripts atualizados do ecossistema TensorFlow e Teachable Machine -->
+<script src="https://jsdelivr.net"></script>
+<script src="https://jsdelivr.net"></script>
+<script src="script.js"></script>
+</body>
+</html>
