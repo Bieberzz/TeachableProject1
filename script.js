@@ -1,13 +1,9 @@
+
 "use strict";
 
-/*
- * DESAFIO DOS ANIMAIS: LIBRAS
- * HTML5 + CSS3 + JavaScript + TensorFlow.js + Teachable Machine.
- */
-
-// ======================================================
-// 1. CONFIGURAÇÕES
-// ======================================================
+// ============================================
+// 1. CONFIGURAÇÕES DO JOGO
+// ============================================
 
 const MODEL_URL =
   "https://teachablemachine.withgoogle.com/models/S2ak9l58J/";
@@ -16,103 +12,69 @@ const REQUIRED_CONFIDENCE = 0.85;
 const HOLD_DURATION_MS = 1500;
 const INFERENCE_INTERVAL_MS = 100;
 
-// Classes esperadas no modelo, na ordem das fases.
 const PHASES = [
-  {
-    animal: "macaco",
-    title: "Sinal de Macaco",
-    image: "imagens/macaco.png"
-  },
-  {
-    animal: "boi",
-    title: "Sinal de Boi",
-    image: "imagens/boi.png"
-  },
-  {
-    animal: "cachorro",
-    title: "Sinal de Cachorro",
-    image: "imagens/cachorro.png"
-  },
-  {
-    animal: "gorila",
-    title: "Sinal de Gorila",
-    image: "imagens/gorila.png"
-  },
-  {
-    animal: "barata",
-    title: "Sinal de Barata",
-    image: "imagens/barata.png"
-  }
+  { animal: "macaco", title: "Sinal de Macaco", image: "imagens/macaco.png" },
+  { animal: "boi", title: "Sinal de Boi", image: "imagens/boi.png" },
+  { animal: "cachorro", title: "Sinal de Cachorro", image: "imagens/cachorro.png" },
+  { animal: "gorila", title: "Sinal de Gorila", image: "imagens/gorila.png" },
+  { animal: "barata", title: "Sinal de Barata", image: "imagens/barata.png" }
 ];
 
-// ======================================================
-// 2. ELEMENTOS DA INTERFACE
-// ======================================================
+// ============================================
+// 2. ELEMENTOS HTML
+// ============================================
 
 const $ = id => document.getElementById(id);
 
 const ui = {
   gameScreen: $("game-screen"),
   endScreen: $("end-screen"),
-
   phaseLabel: $("phase-label"),
   animalTitle: $("animal-title"),
   animalDescription: $("animal-description"),
-
   tutorialImage: $("tutorial-image"),
   imageFallback: $("image-fallback"),
   imagePath: $("image-path"),
-
   webcamContainer: $("webcam-container"),
   cameraPlaceholder: $("camera-placeholder"),
-
   predictionLabel: $("prediction-label"),
   confidenceTrack: $("confidence-track"),
   confidenceFill: $("confidence-fill"),
   confidenceText: $("confidence-text"),
-
   progressTrack: $("progress-track"),
   progressFill: $("progress-fill"),
   progressPercent: $("progress-percent"),
   progressMessage: $("progress-message"),
-
   statusMessage: $("status-message"),
-
   startButton: $("start-button"),
   restartButton: $("restart-button")
 };
 
-// ======================================================
-// 3. ESTADO DO JOGO
-// ======================================================
+// ============================================
+// 3. ESTADO
+// ============================================
 
 let model = null;
 let webcam = null;
-
 let currentPhase = 0;
 let accumulatedTime = 0;
-
-let lastFrameTime = 0;
 let lastInferenceTime = 0;
-
 let animationFrameId = null;
-
 let isRunning = false;
 let isLoading = false;
 let isFinished = false;
-
-// Cada nova partida recebe uma geração diferente.
-// Isso impede que uma inferência antiga altere o novo jogo.
 let gameGeneration = 0;
 
-// ======================================================
+// ============================================
 // 4. FUNÇÕES AUXILIARES
-// ======================================================
+// ============================================
 
 function normalizeLabel(label) {
   return String(label ?? "")
     .toLowerCase()
-    .trim();
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 function updateStatus(message) {
@@ -127,11 +89,7 @@ function updateProgress() {
 
   ui.progressFill.style.width = `${percent}%`;
   ui.progressPercent.textContent = `${percent}%`;
-
-  ui.progressTrack.setAttribute(
-    "aria-valuenow",
-    String(percent)
-  );
+  ui.progressTrack.setAttribute("aria-valuenow", String(percent));
 }
 
 function resetProgress() {
@@ -147,23 +105,16 @@ function updateConfidence(label, probability) {
 
   const percent = Math.round(safeProbability * 100);
 
-  ui.predictionLabel.textContent =
-    label || "Não identificado";
-
-  ui.confidenceText.textContent =
-    `Confiança: ${percent}%`;
-
+  ui.predictionLabel.textContent = label || "Não identificado";
+  ui.confidenceText.textContent = `Confiança: ${percent}%`;
   ui.confidenceFill.style.width = `${percent}%`;
 
-  ui.confidenceTrack.setAttribute(
-    "aria-valuenow",
-    String(percent)
-  );
+  ui.confidenceTrack.setAttribute("aria-valuenow", String(percent));
 }
 
-// ======================================================
-// 5. ATUALIZAÇÃO DAS FASES
-// ======================================================
+// ============================================
+// 5. FASES E IMAGENS
+// ============================================
 
 function renderPhase() {
   const phase = PHASES[currentPhase];
@@ -172,16 +123,12 @@ function renderPhase() {
     `FASE ${currentPhase + 1} DE ${PHASES.length}`;
 
   ui.animalTitle.textContent = phase.title;
-
   ui.animalDescription.textContent =
     `Observe o tutorial e reproduza o sinal de ${phase.animal}.`;
 
   ui.tutorialImage.hidden = false;
   ui.imageFallback.hidden = true;
-
-  ui.tutorialImage.alt =
-    `Tutorial do sinal de ${phase.animal} em Libras`;
-
+  ui.tutorialImage.alt = `Tutorial do sinal de ${phase.animal} em Libras`;
   ui.tutorialImage.src = phase.image;
 
   ui.progressMessage.textContent =
@@ -190,13 +137,10 @@ function renderPhase() {
   resetProgress();
 }
 
-// Trata imagens ausentes sem utilizar HTML dinâmico.
 ui.tutorialImage.addEventListener("error", () => {
   ui.tutorialImage.hidden = true;
   ui.imageFallback.hidden = false;
-
-  ui.imagePath.textContent =
-    PHASES[currentPhase].image;
+  ui.imagePath.textContent = PHASES[currentPhase].image;
 });
 
 ui.tutorialImage.addEventListener("load", () => {
@@ -204,47 +148,42 @@ ui.tutorialImage.addEventListener("load", () => {
   ui.imageFallback.hidden = true;
 });
 
-// ======================================================
+// ============================================
 // 6. CARREGAMENTO DO MODELO
-// ======================================================
+// ============================================
 
 async function loadModel() {
   if (typeof tf === "undefined") {
-    throw new Error(
-      "TensorFlow.js não carregou. Verifique sua conexão."
-    );
+    throw new Error("TensorFlow.js não foi carregado. Verifique sua internet.");
   }
 
   if (typeof tmImage === "undefined") {
-    throw new Error(
-      "A biblioteca Teachable Machine não carregou."
-    );
+    throw new Error("A biblioteca Teachable Machine não foi carregada.");
   }
 
   const baseURL = MODEL_URL.endsWith("/")
     ? MODEL_URL
     : `${MODEL_URL}/`;
 
-  updateStatus("Carregando inteligência artificial...");
+  updateStatus("Carregando o modelo de inteligência artificial...");
 
   model = await tmImage.load(
     `${baseURL}model.json`,
     `${baseURL}metadata.json`
   );
 
-  // Verifica as classes reais do modelo publicado.
   const availableClasses = model
     .getClassLabels()
     .map(normalizeLabel);
 
+  // Só exigimos as cinco classes necessárias para as fases.
+  // "ninguem" e "parado" são opcionais.
   const requiredClasses = [
     "macaco",
     "boi",
     "cachorro",
     "gorila",
-    "barata",
-    "ninguem",
-    "parado"
+    "barata"
   ];
 
   const missingClasses = requiredClasses.filter(
@@ -255,21 +194,23 @@ async function loadModel() {
     model = null;
 
     throw new Error(
-      `O modelo não contém estas classes: ${
-        missingClasses.join(", ")
-      }. Confira as labels no Teachable Machine.`
+      `O modelo não contém estas classes: ${missingClasses.join(", ")}. ` +
+      `Classes encontradas: ${availableClasses.join(", ")}.`
     );
   }
+
+  console.log("Modelo carregado!");
+  console.log("Classes detectadas:", availableClasses);
 }
 
-// ======================================================
-// 7. INICIALIZAÇÃO DA WEBCAM
-// ======================================================
+// ============================================
+// 7. WEBCAM
+// ============================================
 
 async function startWebcam() {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error(
-      "A webcam exige HTTPS ou localhost em um navegador compatível."
+      "A câmera exige HTTPS ou localhost. Abra o projeto pelo Live Server."
     );
   }
 
@@ -280,26 +221,21 @@ async function startWebcam() {
     await webcam.play();
 
     ui.cameraPlaceholder.hidden = true;
-
     ui.webcamContainer.appendChild(webcam.canvas);
   } catch (error) {
     stopWebcam();
 
     if (error.name === "NotAllowedError") {
       throw new Error(
-        "Acesso à câmera negado. Permita o uso da webcam no navegador."
+        "Permissão da câmera negada. Permita o acesso nas configurações do navegador."
       );
     }
 
     if (error.name === "NotFoundError") {
-      throw new Error(
-        "Nenhuma câmera foi encontrada neste dispositivo."
-      );
+      throw new Error("Nenhuma câmera foi encontrada.");
     }
 
-    throw new Error(
-      `Não foi possível iniciar a câmera: ${error.message}`
-    );
+    throw new Error(`Falha na câmera: ${error.message}`);
   }
 }
 
@@ -308,7 +244,7 @@ function stopWebcam() {
     try {
       webcam.stop();
     } catch (error) {
-      console.warn("Erro ao encerrar a webcam:", error);
+      console.warn("Erro ao encerrar câmera:", error);
     }
 
     if (webcam.canvas) {
@@ -321,14 +257,12 @@ function stopWebcam() {
   ui.cameraPlaceholder.hidden = false;
 }
 
-// ======================================================
-// 8. INÍCIO DO JOGO
-// ======================================================
+// ============================================
+// 8. INICIAR JOGO
+// ============================================
 
 async function startGame() {
-  if (isLoading || isRunning) {
-    return;
-  }
+  if (isLoading || isRunning) return;
 
   isLoading = true;
   ui.startButton.disabled = true;
@@ -341,10 +275,7 @@ async function startGame() {
       await loadModel();
     }
 
-    // O usuário pode ter iniciado outra operação durante o carregamento.
-    if (generation !== gameGeneration) {
-      return;
-    }
+    if (generation !== gameGeneration) return;
 
     await startWebcam();
 
@@ -354,7 +285,6 @@ async function startGame() {
     }
 
     currentPhase = 0;
-    lastFrameTime = 0;
     lastInferenceTime = 0;
     isFinished = false;
     isRunning = true;
@@ -366,23 +296,18 @@ async function startGame() {
 
     ui.startButton.textContent = "Jogo em andamento";
 
-    updateStatus(
-      "Câmera pronta! Faça o sinal de macaco."
-    );
+    updateStatus("Câmera pronta! Faça o sinal de macaco.");
 
-    // Inicia um único loop de reconhecimento.
     animationFrameId = requestAnimationFrame(
       timestamp => gameLoop(timestamp, generation)
     );
   } catch (error) {
-    console.error("Erro ao iniciar o jogo:", error);
+    console.error("Erro ao iniciar:", error);
 
     isRunning = false;
     stopWebcam();
 
-    updateStatus(
-      `Não foi possível iniciar: ${error.message}`
-    );
+    updateStatus(`Não foi possível iniciar: ${error.message}`);
 
     ui.startButton.disabled = false;
     ui.startButton.textContent = "Tentar novamente";
@@ -391,9 +316,9 @@ async function startGame() {
   }
 }
 
-// ======================================================
-// 9. LOOP DA INTELIGÊNCIA ARTIFICIAL
-// ======================================================
+// ============================================
+// 9. LOOP DE RECONHECIMENTO
+// ============================================
 
 async function gameLoop(timestamp, generation) {
   if (
@@ -405,37 +330,27 @@ async function gameLoop(timestamp, generation) {
   }
 
   try {
-    // Atualiza a imagem da câmera em cada iteração.
     webcam.update();
 
-    if (lastFrameTime === 0) {
-      lastFrameTime = timestamp;
+    if (lastInferenceTime === 0) {
       lastInferenceTime = timestamp;
 
       scheduleNextFrame(generation);
       return;
     }
 
-    // Evita inferências desnecessariamente frequentes.
-    if (
-      timestamp - lastInferenceTime <
-      INFERENCE_INTERVAL_MS
-    ) {
+    if (timestamp - lastInferenceTime < INFERENCE_INTERVAL_MS) {
       scheduleNextFrame(generation);
       return;
     }
 
-    // Limita grandes saltos de tempo após travamentos da aba.
     const delta = Math.min(
       timestamp - lastInferenceTime,
       200
     );
 
     lastInferenceTime = timestamp;
-    lastFrameTime = timestamp;
 
-    // A execução é sequencial: não iniciamos outro predict()
-    // enquanto esta inferência ainda está sendo processada.
     const predictions = await model.predict(webcam.canvas);
 
     if (
@@ -448,16 +363,13 @@ async function gameLoop(timestamp, generation) {
 
     processPredictions(predictions, delta);
 
-    // Se a última fase foi concluída, finishGame encerra o loop.
     if (isRunning && generation === gameGeneration) {
       scheduleNextFrame(generation);
     }
   } catch (error) {
-    if (generation !== gameGeneration) {
-      return;
-    }
+    if (generation !== gameGeneration) return;
 
-    console.error("Erro durante a inferência:", error);
+    console.error("Erro na inferência:", error);
 
     isRunning = false;
     gameGeneration++;
@@ -470,7 +382,7 @@ async function gameLoop(timestamp, generation) {
     stopWebcam();
 
     updateStatus(
-      "O reconhecimento falhou. Clique para tentar novamente."
+      "O reconhecimento falhou. Tente iniciar novamente."
     );
 
     ui.startButton.disabled = false;
@@ -492,9 +404,9 @@ function scheduleNextFrame(generation) {
   );
 }
 
-// ======================================================
-// 10. VALIDAÇÃO DO SINAL
-// ======================================================
+// ============================================
+// 10. VALIDAÇÃO DAS PREVISÕES
+// ============================================
 
 function processPredictions(predictions, delta) {
   if (!Array.isArray(predictions) || predictions.length === 0) {
@@ -502,21 +414,13 @@ function processPredictions(predictions, delta) {
     return;
   }
 
-  // Escolhe a classe com maior probabilidade.
   const bestPrediction = predictions.reduce(
-    (best, prediction) =>
-      prediction.probability > best.probability
-        ? prediction
-        : best
+    (best, item) =>
+      item.probability > best.probability ? item : best
   );
 
-  const predictedLabel = normalizeLabel(
-    bestPrediction.className
-  );
-
-  const probability = Number(
-    bestPrediction.probability
-  ) || 0;
+  const predictedLabel = normalizeLabel(bestPrediction.className);
+  const probability = Number(bestPrediction.probability) || 0;
 
   updateConfidence(predictedLabel, probability);
 
@@ -524,10 +428,10 @@ function processPredictions(predictions, delta) {
     PHASES[currentPhase].animal
   );
 
-  // As classes neutras nunca podem concluir uma fase.
-  const isNeutral =
-    predictedLabel === "parado" ||
-    predictedLabel === "ninguem";
+  // A normalização também converte "ninguém" em "ninguem".
+  const neutralClasses = ["ninguem", "parado"];
+
+  const isNeutral = neutralClasses.includes(predictedLabel);
 
   const isCorrect =
     !isNeutral &&
@@ -535,7 +439,6 @@ function processPredictions(predictions, delta) {
     probability > REQUIRED_CONFIDENCE;
 
   if (isCorrect) {
-    // Soma o tempo apenas enquanto o sinal é reconhecido.
     accumulatedTime = Math.min(
       HOLD_DURATION_MS,
       accumulatedTime + delta
@@ -557,7 +460,6 @@ function processPredictions(predictions, delta) {
     return;
   }
 
-  // O sinal mudou, a confiança caiu ou não há sinal.
   decayProgress(delta);
 
   if (isNeutral) {
@@ -574,18 +476,15 @@ function processPredictions(predictions, delta) {
     ui.progressMessage.textContent =
       "Mantenha a confiança acima de 85%.";
 
-    updateStatus("Quase lá! Continue ajustando o sinal.");
+    updateStatus("Continue ajustando o sinal.");
   }
 }
 
-// ======================================================
-// 11. DECAIMENTO GRADUAL DA BARRA
-// ======================================================
+// ============================================
+// 11. DECAIMENTO DO PROGRESSO
+// ============================================
 
 function decayProgress(delta) {
-  // Em condições normais, a barra recua cerca de 100 ms
-  // para cada 100 ms sem um sinal válido.
-  // O Math.max impede que o progresso fique negativo.
   accumulatedTime = Math.max(
     0,
     accumulatedTime - delta
@@ -594,14 +493,12 @@ function decayProgress(delta) {
   updateProgress();
 }
 
-// ======================================================
-// 12. AVANÇO DE FASE
-// ======================================================
+// ============================================
+// 12. AVANÇAR DE FASE
+// ============================================
 
 function advancePhase() {
-  if (!isRunning || isFinished) {
-    return;
-  }
+  if (!isRunning || isFinished) return;
 
   currentPhase++;
 
@@ -613,20 +510,17 @@ function advancePhase() {
   renderPhase();
 
   updateStatus(
-    `Fase concluída! Agora faça o sinal de ${
-      PHASES[currentPhase].animal
-    }.`
+    `Muito bem! Agora faça o sinal de ${PHASES[currentPhase].animal}.`
   );
 }
 
-// ======================================================
-// 13. TELA DE VITÓRIA
-// ======================================================
+// ============================================
+// 13. FIM DE JOGO
+// ============================================
 
 function finishGame() {
   isFinished = true;
   isRunning = false;
-
   gameGeneration++;
 
   if (animationFrameId !== null) {
@@ -643,18 +537,15 @@ function finishGame() {
   ui.startButton.textContent = "Iniciar jogo";
 }
 
-// ======================================================
-// 14. REINICIALIZAÇÃO
-// ======================================================
+// ============================================
+// 14. REINICIAR
+// ============================================
 
 async function restartGame() {
-  if (isLoading) {
-    return;
-  }
+  if (isLoading) return;
 
   isRunning = false;
   isFinished = false;
-
   gameGeneration++;
 
   if (animationFrameId !== null) {
@@ -666,15 +557,12 @@ async function restartGame() {
 
   currentPhase = 0;
   accumulatedTime = 0;
-  lastFrameTime = 0;
   lastInferenceTime = 0;
 
   ui.endScreen.hidden = true;
   ui.gameScreen.hidden = false;
 
-  ui.predictionLabel.textContent =
-    "Aguardando inicialização...";
-
+  ui.predictionLabel.textContent = "Aguardando inicialização...";
   ui.confidenceText.textContent = "Confiança: 0%";
   ui.confidenceFill.style.width = "0%";
 
@@ -687,18 +575,15 @@ async function restartGame() {
 
   updateStatus("Vamos começar uma nova partida!");
 
-  // Reutiliza o modelo já carregado, se disponível.
   await startGame();
 }
 
-// ======================================================
-// 15. EVENTOS E INICIALIZAÇÃO
-// ======================================================
+// ============================================
+// 15. EVENTOS E ESTADO INICIAL
+// ============================================
 
 ui.startButton.addEventListener("click", startGame);
-
 ui.restartButton.addEventListener("click", restartGame);
 
-// Exibe a primeira fase antes de iniciar a câmera.
 renderPhase();
 updateProgress();
