@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,11 +7,397 @@
   <meta name="theme-color" content="#6750d8">
   <meta name="description" content="Aprenda sinais de animais em Libras com inteligência artificial.">
   <title>Desafio dos Animais | Aprenda Libras</title>
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+    :root {
+      --primary: #6750d8;
+      --primary-dark: #4d39b5;
+      --background: #f5f3ff;
+      --surface: #ffffff;
+      --text: #272442;
+      --muted: #77738c;
+      --border: #e8e4f5;
+      --radius: 22px;
+      --shadow: 0 12px 35px rgb(48 35 100 / 8%);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top left, #e7e0ff, transparent 35%),
+        var(--background);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 28px;
+    }
+
+    .brand-icon {
+      display: grid;
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      place-items: center;
+      border-radius: 18px;
+      background: var(--primary);
+      color: white;
+      font-size: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      letter-spacing: -0.04em;
+    }
+
+    .header p,
+    .game-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    #game-screen {
+      padding: clamp(18px, 4vw, 32px);
+      border: 1px solid white;
+      border-radius: 30px;
+      background: rgb(255 255 255 / 85%);
+      box-shadow: var(--shadow);
+    }
+
+    .game-heading {
+      margin-bottom: 25px;
+    }
+
+    .phase-label {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #eee9ff;
+      color: var(--primary-dark);
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+    }
+
+    .game-heading h2 {
+      margin: 12px 0 0;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+    }
+
+    .game-layout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .panel h3 {
+      margin: 0 0 18px;
+      font-size: 1.1rem;
+    }
+
+    .tutorial-image-wrapper {
+      display: grid;
+      min-height: 270px;
+      overflow: hidden;
+      place-items: center;
+      border-radius: 16px;
+      background: #f1effa;
+    }
+
+    .tutorial-image-wrapper img {
+      display: block;
+      width: 100%;
+      max-height: 340px;
+      object-fit: contain;
+    }
+
+    .image-fallback {
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .image-fallback span {
+      font-size: 2.5rem;
+    }
+
+    .image-fallback code {
+      overflow-wrap: anywhere;
+    }
+
+    .instruction {
+      margin: 18px 0 24px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .progress-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+
+    .progress-heading strong {
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-track,
+    .confidence-track {
+      width: 100%;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #ece9f5;
+    }
+
+    .progress-track {
+      height: 12px;
+    }
+
+    .progress-fill,
+    .confidence-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      transition: width 80ms linear;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #8a71f0, #20c997);
+    }
+
+    .progress-message {
+      min-height: 24px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .camera-reference-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .webcam-container {
+      display: grid;
+      min-height: 270px;
+      overflow: hidden;
+      place-items: center;
+      border-radius: 16px;
+      background: #211e34;
+    }
+
+    .webcam-container canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 380px;
+      object-fit: contain;
+      transform: scaleX(-1);
+    }
+
+    .camera-placeholder {
+      padding: 25px;
+      color: #d8d2f0;
+      text-align: center;
+    }
+
+    .camera-placeholder span {
+      font-size: 3rem;
+    }
+
+    .camera-placeholder p {
+      margin-bottom: 0;
+    }
+
+    .recognition-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 15px;
+      background: #f7f5ff;
+    }
+
+    .recognition-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    #prediction-label {
+      margin: 8px 0 12px;
+      font-size: 1.1rem;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .confidence-track {
+      height: 7px;
+    }
+
+    .confidence-fill {
+      background: var(--primary);
+    }
+
+    .confidence-text {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .status-message {
+      min-height: 42px;
+      margin: 18px 0 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .button {
+      display: inline-flex;
+      width: 100%;
+      min-height: 50px;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 20px;
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 750;
+      transition: background-color 150ms, transform 150ms;
+    }
+
+    .button-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .button-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .button:active {
+      transform: scale(0.98);
+    }
+
+    .button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .end-screen {
+      padding: 60px 24px;
+      border-radius: 30px;
+      background: white;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .celebration-icon {
+      font-size: clamp(3rem, 10vw, 5rem);
+    }
+
+    .end-screen h2 {
+      margin: 20px 0 12px;
+      color: var(--primary);
+      font-size: clamp(2rem, 6vw, 3rem);
+    }
+
+    .end-screen p {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .end-screen .button {
+      max-width: 300px;
+      margin-top: 20px;
+    }
+
+    .footer {
+      padding: 24px 0 4px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .game-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+
+      #game-screen {
+        padding: 16px;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .tutorial-image-wrapper,
+      .webcam-container {
+        min-height: 220px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.3/dist/teachablemachine-image.min.js"></script>
   <script src="script.js" defer></script>
 </head>
+
 <body>
   <main class="app">
     <header class="header">
@@ -25,40 +412,65 @@
       <div class="game-heading">
         <span id="phase-label" class="phase-label">FASE 1 DE 5</span>
         <h2 id="animal-title">Sinal de Macaco</h2>
-        <p id="animal-description">Observe o tutorial e reproduza o sinal diante da câmera.</p>
+        <p id="animal-description">
+          Observe o tutorial e reproduza o sinal diante da câmera.
+        </p>
       </div>
 
       <div class="game-layout">
         <section class="panel" aria-labelledby="tutorial-heading">
           <h3 id="tutorial-heading">📚 Aprenda o sinal</h3>
+
           <div class="tutorial-image-wrapper">
-            <img id="tutorial-image" src="imagens/macaco.png" alt="Tutorial do sinal de macaco em Libras">
+            <img
+              id="tutorial-image"
+              src="imagens/macaco.png"
+              alt="Tutorial do sinal de macaco em Libras"
+            >
+
             <div id="image-fallback" class="image-fallback" hidden>
-              <span aria-hidden="true">🖼️</span>
-              <p>Imagem do tutorial não encontrada.</p>
+              <span aria-hidden="true">🖐️</span>
+              <p>Reproduza o sinal indicado para avançar.</p>
               <code id="image-path"></code>
             </div>
           </div>
-          <p class="instruction">Faça o sinal mostrado na imagem e mantenha-o estável até completar a barra de progresso.</p>
+
+          <p class="instruction">
+            Faça o sinal e mantenha-o estável até completar a barra
+            de progresso.
+          </p>
+
           <div class="progress-section">
             <div class="progress-heading">
               <span>Progresso do sinal</span>
               <strong id="progress-percent">0%</strong>
             </div>
-            <div id="progress-track" class="progress-track" role="progressbar" aria-label="Progresso de validação do sinal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+
+            <div
+              id="progress-track"
+              class="progress-track"
+              role="progressbar"
+              aria-label="Progresso de validação do sinal"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
               <div id="progress-fill" class="progress-fill"></div>
             </div>
-            <p id="progress-message" class="progress-message" aria-live="polite">Prepare-se para começar!</p>
+
+            <p id="progress-message" class="progress-message" aria-live="polite">
+              Prepare-se para começar!
+            </p>
           </div>
         </section>
 
         <section class="panel" aria-labelledby="camera-heading">
           <h3 id="camera-heading">📸 Sua vez!</h3>
 
-          <!-- Câmera e imagem de referência lado a lado -->
           <div class="camera-reference-layout">
             <div class="camera-column">
-              <h4>📷 Sua câmera</h4>
+              <h4>Sua câmera</h4>
+
               <div id="webcam-container" class="webcam-container">
                 <div id="camera-placeholder" class="camera-placeholder">
                   <span aria-hidden="true">📷</span>
@@ -66,31 +478,43 @@
                 </div>
               </div>
             </div>
-
-            <div class="reference-column">
-              <h4>👋 Referência dos sinais</h4>
-              <div class="reference-image-wrapper">
-                <img
-                  src="imagens/referencia-animais.png"
-                  alt="Referência visual dos sinais em Libras para macaco, boi, cachorro, gorila e barata"
-                  class="reference-image"
-                >
-              </div>
-              <p class="reference-caption">Consulte os movimentos da imagem enquanto pratica o sinal.</p>
-            </div>
           </div>
 
           <div class="recognition-box">
             <span class="recognition-label">Reconhecimento da IA</span>
-            <p id="prediction-label" aria-live="polite">Aguardando inicialização...</p>
-            <div class="confidence-track" role="progressbar" aria-label="Confiança da previsão" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="confidence-track">
+
+            <p id="prediction-label" aria-live="polite">
+              Aguardando inicialização...
+            </p>
+
+            <div
+              id="confidence-track"
+              class="confidence-track"
+              role="progressbar"
+              aria-label="Confiança da previsão"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
               <div id="confidence-fill" class="confidence-fill"></div>
             </div>
-            <p id="confidence-text" class="confidence-text">Confiança: 0%</p>
+
+            <p id="confidence-text" class="confidence-text">
+              Confiança: 0%
+            </p>
           </div>
 
-          <p id="status-message" class="status-message" role="status">Clique para iniciar o jogo.</p>
-          <button id="start-button" class="button button-primary" type="button">Iniciar jogo</button>
+          <p id="status-message" class="status-message" role="status">
+            Clique para iniciar o jogo.
+          </p>
+
+          <button
+            id="start-button"
+            class="button button-primary"
+            type="button"
+          >
+            Iniciar jogo
+          </button>
         </section>
       </div>
     </section>
@@ -100,10 +524,20 @@
       <h2>Parabéns!</h2>
       <p>Você concluiu todas as cinco fases do Desafio dos Animais!</p>
       <p>Continue praticando e aprendendo Libras. 💜</p>
-      <button id="restart-button" class="button button-primary" type="button">Jogar novamente</button>
+
+      <button
+        id="restart-button"
+        class="button button-primary"
+        type="button"
+      >
+        Jogar novamente
+      </button>
     </section>
 
-    <footer class="footer"><p>Aprender Libras é construir pontes! 💜</p></footer>
+    <footer class="footer">
+      <p>Aprender Libras é construir pontes! 💜</p>
+    </footer>
   </main>
 </body>
 </html>
+```
