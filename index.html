@@ -1,32 +1,109 @@
-<div class="camera-reference-layout">
-
-  <!-- Câmera do jogador -->
-  <div class="camera-column">
-    <h4>📷 Sua câmera</h4>
-
-    <div id="webcam-container" class="webcam-container">
-      <div id="camera-placeholder" class="camera-placeholder">
-        <span aria-hidden="true">📷</span>
-        <p>Sua câmera aparecerá aqui.</p>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750d8">
+  <meta name="description" content="Aprenda sinais de animais em Libras com inteligência artificial.">
+  <title>Desafio dos Animais | Aprenda Libras</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.3/dist/teachablemachine-image.min.js"></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="brand-icon" aria-hidden="true">🤟</div>
+      <div>
+        <h1>Desafio dos Animais</h1>
+        <p>Aprenda Libras brincando!</p>
       </div>
-    </div>
-  </div>
+    </header>
 
-  <!-- Referência fixa com os cinco sinais -->
-  <div class="reference-column">
-    <h4>👋 Tutorial dos animais</h4>
+    <section id="game-screen">
+      <div class="game-heading">
+        <span id="phase-label" class="phase-label">FASE 1 DE 5</span>
+        <h2 id="animal-title">Sinal de Macaco</h2>
+        <p id="animal-description">Observe o tutorial e reproduza o sinal diante da câmera.</p>
+      </div>
 
-    <div class="reference-image-wrapper">
-      <img
-        src="imagens/referencia-animais.png"
-        alt="Tutorial visual dos sinais de macaco, boi, cachorro, gorila e barata em Libras"
-        class="reference-image"
-      >
-    </div>
+      <div class="game-layout">
+        <section class="panel" aria-labelledby="tutorial-heading">
+          <h3 id="tutorial-heading">📚 Aprenda o sinal</h3>
+          <div class="tutorial-image-wrapper">
+            <img id="tutorial-image" src="imagens/macaco.png" alt="Tutorial do sinal de macaco em Libras">
+            <div id="image-fallback" class="image-fallback" hidden>
+              <span aria-hidden="true">🖼️</span>
+              <p>Imagem do tutorial não encontrada.</p>
+              <code id="image-path"></code>
+            </div>
+          </div>
+          <p class="instruction">Faça o sinal mostrado na imagem e mantenha-o estável até completar a barra de progresso.</p>
+          <div class="progress-section">
+            <div class="progress-heading">
+              <span>Progresso do sinal</span>
+              <strong id="progress-percent">0%</strong>
+            </div>
+            <div id="progress-track" class="progress-track" role="progressbar" aria-label="Progresso de validação do sinal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <p id="progress-message" class="progress-message" aria-live="polite">Prepare-se para começar!</p>
+          </div>
+        </section>
 
-    <p class="reference-caption">
-      Consulte os cinco sinais enquanto pratica.
-    </p>
-  </div>
+        <section class="panel" aria-labelledby="camera-heading">
+          <h3 id="camera-heading">📸 Sua vez!</h3>
 
-</div>
+          <!-- Câmera e imagem de referência lado a lado -->
+          <div class="camera-reference-layout">
+            <div class="camera-column">
+              <h4>📷 Sua câmera</h4>
+              <div id="webcam-container" class="webcam-container">
+                <div id="camera-placeholder" class="camera-placeholder">
+                  <span aria-hidden="true">📷</span>
+                  <p>Sua câmera aparecerá aqui.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="reference-column">
+              <h4>👋 Referência dos sinais</h4>
+              <div class="reference-image-wrapper">
+                <img
+                  src="imagens/referencia-animais.png"
+                  alt="Referência visual dos sinais em Libras para macaco, boi, cachorro, gorila e barata"
+                  class="reference-image"
+                >
+              </div>
+              <p class="reference-caption">Consulte os movimentos da imagem enquanto pratica o sinal.</p>
+            </div>
+          </div>
+
+          <div class="recognition-box">
+            <span class="recognition-label">Reconhecimento da IA</span>
+            <p id="prediction-label" aria-live="polite">Aguardando inicialização...</p>
+            <div class="confidence-track" role="progressbar" aria-label="Confiança da previsão" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="confidence-track">
+              <div id="confidence-fill" class="confidence-fill"></div>
+            </div>
+            <p id="confidence-text" class="confidence-text">Confiança: 0%</p>
+          </div>
+
+          <p id="status-message" class="status-message" role="status">Clique para iniciar o jogo.</p>
+          <button id="start-button" class="button button-primary" type="button">Iniciar jogo</button>
+        </section>
+      </div>
+    </section>
+
+    <section id="end-screen" class="end-screen" hidden>
+      <div class="celebration-icon" aria-hidden="true">🏆🎉</div>
+      <h2>Parabéns!</h2>
+      <p>Você concluiu todas as cinco fases do Desafio dos Animais!</p>
+      <p>Continue praticando e aprendendo Libras. 💜</p>
+      <button id="restart-button" class="button button-primary" type="button">Jogar novamente</button>
+    </section>
+
+    <footer class="footer"><p>Aprender Libras é construir pontes! 💜</p></footer>
+  </main>
+</body>
+</html>

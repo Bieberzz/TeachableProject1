@@ -1,75 +1,104 @@
-/* Câmera e tutorial lado a lado */
-.camera-reference-layout {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  align-items: start;
-  width: 100%;
+:root {
+  color-scheme: light;
+  --primary: #6750d8;
+  --primary-dark: #4d39b5;
+  --background: #f5f3ff;
+  --surface: #ffffff;
+  --text: #272442;
+  --muted: #77738c;
+  --success: #20a879;
+  --border: #e8e4f5;
+  --radius: 22px;
+  --shadow: 0 12px 35px rgb(48 35 100 / 8%);
 }
 
-.camera-column,
-.reference-column {
-  min-width: 0;
-}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
-.camera-column h4,
-.reference-column h4 {
-  margin: 0 0 12px;
-  font-size: 0.95rem;
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 24px;
+  background: radial-gradient(circle at top left, #e7e0ff, transparent 35%), var(--background);
   color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* Área da câmera */
-.camera-reference-layout .webcam-container {
-  width: 100%;
-  min-height: 220px;
-  overflow: hidden;
-  border-radius: 16px;
+button { font: inherit; }
+.app { width: min(1120px, 100%); margin: 0 auto; }
+.header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+.brand-icon {
+  display: grid; width: 60px; height: 60px; flex-shrink: 0; place-items: center;
+  border-radius: 18px; background: var(--primary); color: #fff; font-size: 30px; box-shadow: var(--shadow);
 }
+.header h1 { margin: 0; font-size: clamp(1.45rem, 4vw, 2rem); letter-spacing: -0.04em; }
+.header p, .game-heading p { margin: 5px 0 0; color: var(--muted); line-height: 1.6; }
+#game-screen { padding: clamp(18px, 4vw, 32px); border: 1px solid rgb(255 255 255 / 80%); border-radius: 30px; background: rgb(255 255 255 / 75%); box-shadow: var(--shadow); }
+.game-heading { margin-bottom: 25px; }
+.phase-label { display: inline-block; padding: 7px 12px; border-radius: 999px; background: #eee9ff; color: var(--primary-dark); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.07em; }
+.game-heading h2 { margin: 12px 0 0; font-size: clamp(1.5rem, 4vw, 2rem); }
+.game-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+.panel { min-width: 0; padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.panel h3 { margin: 0 0 18px; font-size: 1.1rem; }
+.tutorial-image-wrapper { display: grid; min-height: 270px; overflow: hidden; place-items: center; border-radius: 16px; background: #f1effa; }
+.tutorial-image-wrapper img { display: block; width: 100%; max-height: 340px; object-fit: contain; }
+.image-fallback { padding: 24px; color: var(--muted); text-align: center; line-height: 1.7; }
+.image-fallback span { font-size: 2.5rem; }
+.image-fallback code { overflow-wrap: anywhere; }
+.instruction { margin: 18px 0 24px; color: var(--muted); line-height: 1.7; }
+.progress-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 0.9rem; }
+.progress-heading strong { color: var(--primary); font-variant-numeric: tabular-nums; }
+.progress-track, .confidence-track { width: 100%; overflow: hidden; border-radius: 999px; background: #ece9f5; }
+.progress-track { height: 12px; }
+.progress-fill, .confidence-fill { width: 0%; height: 100%; border-radius: inherit; transition: width 80ms linear; }
+.progress-fill { background: linear-gradient(90deg, #8a71f0, #20c997); }
+.progress-message { min-height: 24px; margin: 10px 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
 
-/* Área da imagem fixa */
-.reference-image-wrapper {
-  width: 100%;
-  min-height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: #fff;
+/* Câmera e referência dos sinais lado a lado */
+.camera-reference-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.camera-column, .reference-column { min-width: 0; }
+.camera-column h4, .reference-column h4 { margin: 0 0 12px; font-size: 0.95rem; color: var(--text); }
+.webcam-container { display: grid; min-height: 270px; overflow: hidden; place-items: center; border-radius: 16px; background: #211e34; }
+.webcam-container canvas { display: block; width: 100%; height: auto; max-height: 380px; object-fit: contain; transform: scaleX(-1); }
+.camera-placeholder { padding: 25px; color: #d8d2f0; text-align: center; }
+.camera-placeholder span { font-size: 3rem; }
+.camera-placeholder p { margin-bottom: 0; }
+.reference-image-wrapper { display: grid; min-height: 270px; overflow: hidden; place-items: center; border: 1px solid var(--border); border-radius: 16px; background: #fff; }
+.reference-image { display: block; width: 100%; height: 270px; object-fit: contain; }
+.reference-caption { margin: 10px 0 0; color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+.recognition-box { margin-top: 20px; padding: 16px; border-radius: 15px; background: #f7f5ff; }
+.recognition-label { color: var(--muted); font-size: 0.8rem; }
+#prediction-label { margin: 8px 0 12px; font-size: 1.1rem; font-weight: 750; overflow-wrap: anywhere; }
+.confidence-track { height: 7px; }
+.confidence-fill { background: var(--primary); }
+.confidence-text { margin: 8px 0 0; color: var(--muted); font-size: 0.8rem; }
+.status-message { min-height: 42px; margin: 18px 0 12px; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+.button { display: inline-flex; width: 100%; min-height: 50px; align-items: center; justify-content: center; padding: 13px 20px; border: 0; border-radius: 14px; cursor: pointer; font-weight: 750; transition: background-color 150ms ease, transform 150ms ease; }
+.button-primary { background: var(--primary); color: #fff; }
+.button-primary:hover { background: var(--primary-dark); }
+.button:active { transform: scale(0.98); }
+.button:focus-visible { outline: 3px solid #a99aff; outline-offset: 3px; }
+.button:disabled { cursor: wait; opacity: 0.65; }
+.end-screen { padding: 60px 24px; border-radius: 30px; background: var(--surface); box-shadow: var(--shadow); text-align: center; }
+.celebration-icon { font-size: clamp(3rem, 10vw, 5rem); }
+.end-screen h2 { margin: 20px 0 12px; color: var(--primary); font-size: clamp(2rem, 6vw, 3rem); }
+.end-screen p { color: var(--muted); line-height: 1.7; }
+.end-screen .button { max-width: 300px; margin-top: 20px; }
+.footer { padding: 24px 0 4px; color: var(--muted); font-size: 0.85rem; text-align: center; }
+
+@media (max-width: 900px) {
+  .game-layout { grid-template-columns: 1fr; }
 }
-
-.reference-image {
-  display: block;
-  width: 100%;
-  height: 220px;
-  object-fit: contain;
-}
-
-.reference-caption {
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-
-/* Layout para celulares */
 @media (max-width: 760px) {
-  .camera-reference-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .camera-reference-layout .webcam-container {
-    min-height: 220px;
-  }
-
-  .reference-image-wrapper {
-    min-height: 180px;
-  }
-
-  .reference-image {
-    height: auto;
-    max-height: 320px;
-  }
+  body { padding: 14px; }
+  #game-screen { padding: 18px; }
+  .panel { padding: 17px; }
+  .tutorial-image-wrapper, .webcam-container { min-height: 220px; }
+  .tutorial-image-wrapper img { max-height: 300px; }
+  .camera-reference-layout { grid-template-columns: 1fr; }
+  .reference-image-wrapper { min-height: 180px; }
+  .reference-image { height: auto; max-height: 300px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
